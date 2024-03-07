@@ -1,6 +1,5 @@
 name: 01 - Bulding Blocks
 on:
-  push:
   workflow_dispatch:
 
 jobs:
