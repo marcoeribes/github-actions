@@ -10,14 +10,14 @@ on:
         default: false
 
 env:
-  MY_WORKFLOW-VAR: "workflow"
+  MY_WORKFLOW_VAR: "workflow"
   MY_OVERWRITTEN_VAR: "workflow"
 
 jobs:
   echo-data:
     runs-on: ubuntu-latest
     env:
-      MY_JOB-VAR: "job"
+      MY_JOB_VAR: "job"
       MY_OVERWRITTEN_VAR: "job"
     steps:
       - name: Display information
