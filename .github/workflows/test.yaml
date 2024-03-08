@@ -1,36 +1,47 @@
-name: test workflow
+# See 12-outputs/README.md for more information
+# about how to define outputs from jobs and
+# reference them from within other dependent jobs.
+
+name: test
 
 on:
   workflow_dispatch:
     inputs:
-      dry-run:
-        type: boolean
-        description: Skip deployment and only print build output
-        default: false
-      target:
-        type: environment
-        required: true
-        description: Which environment the workflow will target
-      tag:
+      build-status:
         type: choice
         options:
-          - v1
-          - v2
-          - v3
-        default: v3
-        description: Release from which to build and deploy
+          - success
+          - failure
+        default: success
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      build-status: ${{ steps.build.outputs.status }}
+      output1: ${{ steps.build.outputs.output1 }}
     steps:
+      - name: Print GITHUB_OUTPUT path
+        run: echo "$GITHUB_OUTPUT"
       - name: Build
-        run: echo "Building from tag ${{ inputs.tag }}"
+        id: build
+        run: |
+          echo "$GITHUB_OUTPUT"
+          echo "status=${{ inputs.build-status }}" >> "$GITHUB_OUTPUT"
+          echo "output1=value1" >> "$GITHUB_OUTPUT"
+          echo "output2=value2" >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
+      - name: Step with mistake
+        run: |
+          echo "mistake=true" > "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
   deploy:
     runs-on: ubuntu-latest
-    if: ${{ !inputs.dry-run }}
-    environment: ${{ inputs.target }}
     needs: build
+    if: ${{ needs.build.outputs.build-status == 'success' }}
     steps:
       - name: Deploy
-        run: echo "Deploying to ${{ inputs.target }}"
+        run: echo "Deploying"
+      - name: Print Outputs
+        run: |
+          echo "Output 1: ${{ needs.build.outputs.output1 }}"
