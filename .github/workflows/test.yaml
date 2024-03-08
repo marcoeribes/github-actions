@@ -1,4 +1,4 @@
-name: 11 - Working with Inputs
+name: test workflow
 
 on:
   workflow_dispatch:
