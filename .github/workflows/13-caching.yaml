@@ -71,7 +71,7 @@ jobs:
       - name: Testing
         run: npm test
       - name: Linting
-        run: echo "Linting"
+        run: echo "Linting..."
   build:
     runs-on: ubuntu-latest
     needs: install-deps
