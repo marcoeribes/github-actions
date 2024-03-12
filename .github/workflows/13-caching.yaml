@@ -30,7 +30,7 @@ jobs:
         with:
           node-version: ${{ inputs.node-version }}
       - name: Download cached dependencies
-        uses: actions/ache@v3
+        uses: actions/cache@v3
         if: ${{ inputs.use-cache }}
         id: cache
         with:
