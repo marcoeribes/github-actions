@@ -7,12 +7,24 @@ const validateBranchName = ({ branchName }) =>
 const validateDirectoryName = ({ dirName }) =>
   /^[a-zA-Z0-9_\-\.\/]+$/.test(dirName);
 
+const setupLogger = ({ debug, prefix } = { debug: false, prefix: "" }) => ({
+  debug: () => {
+    if (debug) {
+      core.info(`DEBUG ${prefix}${prefix ? " : " : ""}${message}`);
+    }
+  },
+  error: () => {
+    core.error(`${prefix}${prefix ? " : " : ""}${message}`);
+  },
+});
+
 async function run() {
   const baseBranch = core.getInput("base-branch", { required: true });
   const targetBranch = core.getInput("target-branch", { required: true });
   const ghToken = core.getInput("gh-token", { required: true }); // secret
   const workingDir = core.getInput("working-directory", { required: true });
   const debug = core.getBooleanInput("debug");
+  const logger = setupLogger({ debug, prefix: `[js-dependency-update]` });
 
   const commonExecOpts = {
     cwd: workingDir,
@@ -20,6 +32,7 @@ async function run() {
 
   core.setSecret(ghToken);
 
+  logger.debug("Validating input: base-branch, head-branch, working-directory");
   if (!validateBranchName({ branchName: baseBranch })) {
     core.setFailed(
       "Invalid base branch name. Branch names should include only characters, numbers, hyphens, underscores, and forward slashes"
@@ -41,9 +54,9 @@ async function run() {
     return;
   }
 
-  core.info(`[js-dependency-update] : base branch is ${baseBranch}`);
-  core.info(`[js-dependency-update] : target branch is ${targetBranch}`);
-  core.info(`[js-dependency-update] : working directory is ${workingDir}`);
+  logger.debug(`base branch is ${baseBranch}`);
+  logger.debug(`target branch is ${targetBranch}`);
+  logger.debug(`working directory is ${workingDir}`);
 
   await exec.exec("npm update", [], {
     ...commonExecOpts,
@@ -56,7 +69,7 @@ async function run() {
   );
 
   if (gitStatus.stdout.length > 0) {
-    core.info("[js-dependency-update] : There are updates available!");
+    logger.debug("There are updates available!");
     await exec.exec(`git config --global user.name "gh-automation`);
     await exec.exec(`git config --global user.email "gh-automation@email.com`);
     await exec.exec(`git checkout -b ${targetBranch}`, [], {
