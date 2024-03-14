@@ -33,4 +33,4 @@ def run():
     print(f"Website {website_url} is reachable")
 
 if __name__ == "__main__":
-    print("Hello world")
+    run()
